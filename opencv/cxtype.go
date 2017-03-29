@@ -262,6 +262,9 @@ func (img *IplImage) ImageSize() int {
 func (img *IplImage) ImageData() unsafe.Pointer {
 	return unsafe.Pointer(img.imageData)
 }
+func (img *IplImage) SetImageData(p unsafe.Pointer) {
+	img.imageData = (*C.char)(p)
+}
 
 type IplROI C.IplROI
 
