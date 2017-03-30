@@ -247,6 +247,9 @@ func (img *IplImage) Depth() int {
 func (img *IplImage) Origin() int {
 	return int(img.origin)
 }
+func (img *IplImage) Align() int {
+	return int(img.align)
+}
 func (img *IplImage) Width() int {
 	return int(img.width)
 }
