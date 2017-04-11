@@ -633,6 +633,19 @@ func AddWithMask(src1, src2, dst, mask *IplImage) {
 	)
 }
 
+// Calculates the weighted sum of two arrays.
+//   dst = src1*alpha + src2*beta + gamma
+func AddWeighted(src1 *IplImage, alpha float64, src2 *IplImage, beta, gamma float64, dst *IplImage) {
+	C.cvAddWeighted(
+		unsafe.Pointer(src1),
+		C.double(alpha),
+		unsafe.Pointer(src2),
+		C.double(beta),
+		C.double(gamma),
+		unsafe.Pointer(dst),
+	)
+}
+
 // Calculates the per-element sum of an array and a scalar.
 //   dst = src + value
 func AddScalar(src *IplImage, value Scalar, dst *IplImage) {
