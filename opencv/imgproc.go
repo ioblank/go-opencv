@@ -119,6 +119,17 @@ func ContourArea(contour *Seq, slice Slice, oriented int) float64 {
 		C.int(oriented)))
 }
 
+// Finds the convex hull of a point set.
+// CvSeq* cvConvexHull2(const CvArr* input, void* hull_storage=NULL, int orientation=CV_CLOCKWISE, int return_points=0 )
+func ConvexHull(points *Seq, clockwise bool) *Seq {
+	orientation := C.int(2)
+	if clockwise {
+		orientation = C.int(1)
+	}
+	storage := C.cvCreateMemStorage(0)
+	return (*Seq)(C.cvConvexHull2(unsafe.Pointer(points), unsafe.Pointer(storage), orientation, C.int(1)))
+}
+
 /* points can be either CvSeq* or CvMat* */
 func FitEllipse2(points unsafe.Pointer) Box2D {
 	box := C.cvFitEllipse2(points)
