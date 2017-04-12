@@ -124,7 +124,6 @@ const (
 	CV_THRESH_TOZERO_INV = C.CV_THRESH_TOZERO_INV
 	CV_THRESH_MASK       = C.CV_THRESH_MASK
 	CV_THRESH_OTSU       = C.CV_THRESH_OTSU
-	CV_THRESH_TRIANGLE   = C.CV_THRESH_TRIANGLE
 )
 
 /* Applies a fixed-level threshold to each array element. */
