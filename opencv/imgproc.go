@@ -84,6 +84,25 @@ func DrawContours(image *IplImage, contours *Seq, externalColor, holeColor Scala
 		C.cvPoint(C.int(offset.X), C.int(offset.Y)))
 }
 
+// HoughCircles finds circles in a grayscale image using the Hough transform.
+//
+// CvSeq* cvHoughCircles(CvArr* image, void* circle_storage, int method, double dp, double min_dist, double param1=100, double param2=100, int min_radius=0, int max_radius=0)
+func HoughCircles(image *IplImage, dp, minDist, param1, param2 float64, minRadius, maxRadius int) *Seq {
+	storage := C.cvCreateMemStorage(0)
+	seq := C.cvHoughCircles(
+		unsafe.Pointer(image),
+		unsafe.Pointer(storage),
+		C.CV_HOUGH_GRADIENT,
+		C.double(dp),
+		C.double(minDist),
+		C.double(param1),
+		C.double(param2),
+		C.int(minRadius),
+		C.int(maxRadius),
+	)
+	return (*Seq)(seq)
+}
+
 // CvSeq* cvApproxPoly(const void* src_seq, int header_size, CvMemStorage* storage, int method, double eps, int recursive=0 )
 func ApproxPoly(src *Seq, header_size int, storage *MemStorage, method int, eps float64, recursive int) *Seq {
 	seq := C.cvApproxPoly(
