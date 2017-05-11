@@ -40,6 +40,23 @@ static int CV_IS_IMAGE_(void* img) {
 	return CV_IS_IMAGE(img);
 }
 
+// Histogram
+static int CV_IS_HIST_(CvHistogram* hist) {
+	return CV_IS_HIST(hist);
+}
+
+static int CV_IS_UNIFORM_HIST_(CvHistogram* hist) {
+	return CV_IS_UNIFORM_HIST(hist);
+}
+
+static int CV_IS_SPARSE_HIST_(CvHistogram* hist) {
+	return CV_IS_SPARSE_HIST(hist);
+}
+
+static int CV_HIST_HAS_RANGES_(CvHistogram* hist) {
+	return CV_HIST_HAS_RANGES(hist);
+}
+
 //-----------------------------------------------------------------------------
 
 // type filed is go keyword
@@ -475,17 +492,102 @@ const (
 
 type Histogram C.CvHistogram
 
-func CV_IS_HIST() bool {
-	return false
+// NewHistogram creates a new uniform histogram.
+//
+// CvHistogram* cvCreateHist(int dims, int* sizes, int type, float** ranges=NULL, int uniform=1)
+func NewHistogram(dims int, sizes []int, histType int, ranges ...[]float32) *Histogram {
+	if len(ranges) != dims {
+		panic("ranges length must be equal to dims")
+	}
+
+	cRanges := make([]*C.float, dims)
+	for i := 0; i < dims; i++ {
+		cRanges[i] = (*C.float)(unsafe.Pointer(&ranges[i][0]))
+	}
+
+	return (*Histogram)(C.cvCreateHist(
+		C.int(dims),
+		(*C.int)(unsafe.Pointer(&sizes[0])),
+		(C.int)(histType),
+		(**C.float)(unsafe.Pointer(&cRanges[0])),
+		C.int(1),
+	))
 }
-func CV_IS_UNIFORM_HIST() bool {
-	return false
+
+// Calc calculates the histogram of the given images in this structure.
+// If accumulate is true, the histogram structure is not cleared. mask can be nil.
+//
+// void cvCalcHist(IplImage** image, CvHistogram* hist, int accumulate=0, const CvArr* mask=NULL)
+func (h *Histogram) Calc(images []*IplImage, accumulate bool, mask *IplImage) {
+	cAcc := C.int(0)
+	if accumulate {
+		cAcc = C.int(1)
+	}
+
+	C.cvCalcHist(
+		(**C.IplImage)(unsafe.Pointer(&images[0])),
+		(*C.CvHistogram)(h),
+		cAcc,
+		unsafe.Pointer(mask),
+	)
 }
-func CV_IS_SPARSE_HIST() bool {
-	return false
+
+// Clear clears the histogram.
+//
+// void cvClearHist(CvHistogram* hist)
+func (h *Histogram) Clear() {
+	C.cvClearHist((*C.struct_CvHistogram)(h))
 }
-func CV_HIST_HAS_RANGES() bool {
-	return false
+
+// CopyTo copies this histogram to the given destination.
+//
+// void cvCopyHist(const CvHistogram* src, CvHistogram** dst)
+func (h *Histogram) CopyTo(dst *Histogram) {
+	dstp := (*C.struct_CvHistogram)(dst)
+	C.cvCopyHist((*C.struct_CvHistogram)(h), &dstp)
+}
+
+// Normalize normalizes the histogram.
+//
+// void cvNormalizeHist(CvHistogram* hist, double factor)
+func (h *Histogram) Normalize(factor int64) {
+	C.cvNormalizeHist((*C.struct_CvHistogram)(h), C.double(factor))
+}
+
+// Release releases the histogram.
+//
+// void cvReleaseHist(CvHistogram** hist)
+func (h *Histogram) Release() {
+	hp := (*C.struct_CvHistogram)(h)
+	C.cvReleaseHist(&hp)
+}
+
+// Threshold thresholds the histogram.
+// The function clears histogram bins that are below the specified threshold.
+//
+// void cvThreshHist(CvHistogram* hist, double threshold)
+func (h *Histogram) Threshold(threshold int64) {
+	C.cvThreshHist((*C.struct_CvHistogram)(h), C.double(threshold))
+}
+
+// IsHist returns true if this is a valid histogram.
+func (h *Histogram) IsHist() bool {
+	return int(C.CV_IS_HIST_((*C.struct_CvHistogram)(unsafe.Pointer(h)))) != 0
+}
+
+// IsUniformHist returns true if this is an uniform histogram.
+func (h *Histogram) IsUniformHist() bool {
+	return int(C.CV_IS_UNIFORM_HIST_((*C.struct_CvHistogram)(unsafe.Pointer(h)))) != 0
+}
+
+// IsSparseHist returns true if this is a sparse histogram.
+func (h *Histogram) IsSparseHist() bool {
+	return int(C.CV_IS_SPARSE_HIST_((*C.struct_CvHistogram)(unsafe.Pointer(h)))) != 0
+}
+
+// HasRanges returns true if this histogram has ranges.
+func (h *Histogram) HasRanges() bool {
+	return int(C.CV_HIST_HAS_RANGES_((*C.struct_CvHistogram)(unsafe.Pointer(h)))) != 0
 }
 
 /****************************************************************************************\

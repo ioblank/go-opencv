@@ -24,6 +24,14 @@ const (
 	CV_INTER_LANCZOS4 = int(C.CV_INTER_LANCZOS4)
 )
 
+const (
+	CV_COMP_CORREL        = int(C.CV_COMP_CORREL)
+	CV_COMP_CHISQR        = int(C.CV_COMP_CHISQR)
+	CV_COMP_INTERSECT     = int(C.CV_COMP_INTERSECT)
+	CV_COMP_BHATTACHARYYA = int(C.CV_COMP_BHATTACHARYYA)
+	CV_COMP_HELLINGER     = int(C.CV_COMP_HELLINGER)
+)
+
 func Resize(src *IplImage, width, height, interpolation int) *IplImage {
 	if width == 0 && height == 0 {
 		panic("Width and Height cannot be 0 at the same time")
@@ -172,4 +180,15 @@ func MinAreaRect(points unsafe.Pointer) Box2D {
 // points can be either CvSeq* or CvMat*
 func BoundingRect(points unsafe.Pointer) Rect {
 	return (Rect)(C.cvBoundingRect(points, C.int(0)))
+}
+
+// CompareHist compares two histograms.
+//
+// double cvCompareHist(const CvHistogram* hist1, const CvHistogram* hist2, int method)
+func CompareHist(h1, h2 *Histogram, method int) int64 {
+	return (int64)(C.cvCompareHist(
+		(*C.struct_CvHistogram)(h1),
+		(*C.struct_CvHistogram)(h2),
+		C.int(method),
+	))
 }
