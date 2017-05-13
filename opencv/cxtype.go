@@ -500,9 +500,10 @@ func NewHistogram(dims int, sizes []int, histType int, ranges ...[]float32) *His
 		panic("ranges length must be equal to dims")
 	}
 
-	cRanges := make([]*C.float, dims)
-	for i := 0; i < dims; i++ {
-		cRanges[i] = (*C.float)(unsafe.Pointer(&ranges[i][0]))
+	cRanges := make([]C.float, dims*2)
+	for d := 0; d < dims; d++ {
+		cRanges[d*2] = C.float(ranges[d][0])
+		cRanges[d*2+1] = C.float(ranges[d][1])
 	}
 
 	return (*Histogram)(C.cvCreateHist(
