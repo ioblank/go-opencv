@@ -170,6 +170,44 @@ func (img *IplImage) GetMat() *Mat {
 	return (*Mat)(m)
 }
 
+// CopyChannel copies the specified channel to the given single-channel IplImage.
+func (img *IplImage) CopyChannel(dst *IplImage, ch int) {
+	fromTo := []int{ch, ch}
+
+	cSrc := unsafe.Pointer(img)
+	cDst := unsafe.Pointer(dst)
+
+	C.cvMixChannels(
+		&cSrc,
+		C.int(1),
+		&cDst,
+		C.int(1),
+		(*C.int)(unsafe.Pointer(&fromTo[0])),
+		C.int(1),
+	)
+}
+
+// Split divides a multi-channel IplImage into several single-channel IplImage.
+// The number of images passed must match the number of channels of this image.
+//
+// void cvSplit(const CvArr* src, CvArr* dst0, CvArr* dst1, CvArr* dst2, CvArr* dst3)
+func (img *IplImage) Split(dsts ...*IplImage) {
+	if len(dsts) != img.Channels() {
+		panic("number of destination images must match source channels")
+	}
+
+	cDsts := make([]*IplImage, 4)
+	copy(cDsts, dsts)
+
+	C.cvSplit(
+		unsafe.Pointer(img),
+		unsafe.Pointer(cDsts[0]),
+		unsafe.Pointer(cDsts[1]),
+		unsafe.Pointer(cDsts[2]),
+		unsafe.Pointer(cDsts[3]),
+	)
+}
+
 // mat step
 const (
 	CV_AUTOSTEP = C.CV_AUTOSTEP
