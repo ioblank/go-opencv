@@ -746,3 +746,20 @@ func TestMeanStdDev(t *testing.T) {
 	}
 
 }
+
+func TestHistogram(t *testing.T) {
+	_, currentfile, _, _ := runtime.Caller(0)
+	filename := path.Join(path.Dir(currentfile), "../images/lena.jpg")
+	if len(os.Args) == 2 {
+		filename = os.Args[1]
+	}
+
+	image := LoadImage(filename)
+	if image == nil {
+		t.Fatal("LoadImage fail")
+	}
+	defer image.Release()
+
+	hist := NewHistogram(1, []int{8}, CV_HIST_ARRAY, []float32{0, 255})
+	defer hist.Release()
+}

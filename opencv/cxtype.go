@@ -41,19 +41,19 @@ static int CV_IS_IMAGE_(void* img) {
 }
 
 // Histogram
-static int CV_IS_HIST_(CvHistogram* hist) {
+static int CV_IS_HIST_(const CvHistogram* hist) {
 	return CV_IS_HIST(hist);
 }
 
-static int CV_IS_UNIFORM_HIST_(CvHistogram* hist) {
+static int CV_IS_UNIFORM_HIST_(const CvHistogram* hist) {
 	return CV_IS_UNIFORM_HIST(hist);
 }
 
-static int CV_IS_SPARSE_HIST_(CvHistogram* hist) {
+static int CV_IS_SPARSE_HIST_(const CvHistogram* hist) {
 	return CV_IS_SPARSE_HIST(hist);
 }
 
-static int CV_HIST_HAS_RANGES_(CvHistogram* hist) {
+static int CV_HIST_HAS_RANGES_(const CvHistogram* hist) {
 	return CV_HIST_HAS_RANGES(hist);
 }
 
@@ -74,6 +74,28 @@ static int myGetSparseMatType(const CvSparseMat* mat) {
 }
 static int myGetTermCriteriaType(const CvTermCriteria* x) {
 	return x->type;
+}
+
+//-----------------------------------------------------------------------------
+
+static CvHistogram* createUniformHistogram(int dims, int* sizes, int type, float* ranges) {
+	float** cRanges = (float**) malloc(dims * sizeof(float*));
+
+	for (int i = 0; i < dims; i++) {
+		float cRange[] = {ranges[i*2], ranges[i*2 + 1]};
+		cRanges[i] = cRange;
+	}
+
+	CvHistogram* hist = cvCreateHist(
+		dims,
+		sizes,
+		type,
+		cRanges,
+		1
+	);
+	free(cRanges);
+
+	return hist;
 }
 
 //-----------------------------------------------------------------------------
@@ -495,24 +517,23 @@ type Histogram C.CvHistogram
 // NewHistogram creates a new uniform histogram.
 //
 // CvHistogram* cvCreateHist(int dims, int* sizes, int type, float** ranges=NULL, int uniform=1)
+// CvHistogram* createUniformHistogram(int dims, int* sizes, int type, float* ranges)
 func NewHistogram(dims int, sizes []int, histType int, ranges ...[]float32) *Histogram {
 	if len(ranges) != dims {
 		panic("ranges length must be equal to dims")
 	}
 
-	cRanges := make([]C.float, dims*2)
+	cRanges := make([]float32, dims*2)
 	for d := 0; d < dims; d++ {
-		cRanges[d*2] = C.float(ranges[d][0])
-		cRanges[d*2+1] = C.float(ranges[d][1])
+		cRanges[d*2] = ranges[d][0]
+		cRanges[d*2+1] = ranges[d][1]
 	}
-	cRangesPtr := (*C.float)(unsafe.Pointer(&cRanges[0]))
 
-	return (*Histogram)(C.cvCreateHist(
+	return (*Histogram)(C.createUniformHistogram(
 		C.int(dims),
 		(*C.int)(unsafe.Pointer(&sizes[0])),
 		(C.int)(histType),
-		&cRangesPtr,
-		C.int(1),
+		(*C.float)(unsafe.Pointer(&cRanges[0])),
 	))
 }
 
