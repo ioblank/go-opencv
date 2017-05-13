@@ -505,12 +505,13 @@ func NewHistogram(dims int, sizes []int, histType int, ranges ...[]float32) *His
 		cRanges[d*2] = C.float(ranges[d][0])
 		cRanges[d*2+1] = C.float(ranges[d][1])
 	}
+	cRangesPtr := (*C.float)(unsafe.Pointer(&cRanges[0]))
 
 	return (*Histogram)(C.cvCreateHist(
 		C.int(dims),
 		(*C.int)(unsafe.Pointer(&sizes[0])),
 		(C.int)(histType),
-		(**C.float)(unsafe.Pointer(&cRanges[0])),
+		&cRangesPtr,
 		C.int(1),
 	))
 }
