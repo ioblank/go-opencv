@@ -754,7 +754,7 @@ func TestHistogram(t *testing.T) {
 		filename = os.Args[1]
 	}
 
-	image := LoadImage(filename)
+	image := LoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE)
 	if image == nil {
 		t.Fatal("LoadImage fail")
 	}
@@ -762,4 +762,7 @@ func TestHistogram(t *testing.T) {
 
 	hist := NewHistogram(1, []int{8}, CV_HIST_ARRAY, []float32{0, 255})
 	defer hist.Release()
+
+	hist.Calc([]*IplImage{image}, false, nil)
+	hist.Normalize(1)
 }

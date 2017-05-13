@@ -82,7 +82,9 @@ static CvHistogram* createUniformHistogram(int dims, int* sizes, int type, float
 	float** cRanges = (float**) malloc(dims * sizeof(float*));
 
 	for (int i = 0; i < dims; i++) {
-		float cRange[] = {ranges[i*2], ranges[i*2 + 1]};
+		float* cRange = (float*) malloc(2 * sizeof(float));
+		cRange[0] = ranges[i*2];
+		cRange[1] = ranges[i*2 + 1];
 		cRanges[i] = cRange;
 	}
 
@@ -93,6 +95,10 @@ static CvHistogram* createUniformHistogram(int dims, int* sizes, int type, float
 		cRanges,
 		1
 	);
+
+	for (int i = 0; i < dims; i++) {
+		free(cRanges[i]);
+	}
 	free(cRanges);
 
 	return hist;
